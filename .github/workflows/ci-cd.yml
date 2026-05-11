@@ -1,6 +1,6 @@
 name: CI/CD Pipeline
 
-on:  
+on:
   push:
     branches:
       - main
@@ -19,6 +19,10 @@ jobs:
     outputs:
       image_tag: ${{ steps.meta.outputs.tag }}
 
+    defaults:
+      run:
+        shell: cmd
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -30,31 +34,21 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-
       - name: Build with Maven Wrapper
-        shell: cmd
         run: mvnw.cmd clean package -DskipTests
 
       - name: Set image tag
-        shell: cmd
+        id: meta
         run: echo tag=%GITHUB_SHA%>> %GITHUB_OUTPUT%
 
       - name: Docker login to Harbor
-        shell: cmd
-        run: echo %DOCKER_PASSWORD% | docker login 210.90.24.172:8080 -u %DOCKER_USERNAME% --password-stdin
+        run: echo %DOCKER_PASSWORD% | docker login %HARBOR_REGISTRY% -u %DOCKER_USERNAME% --password-stdin
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}  
-
-      - name: Log in to Harbor
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.HARBOR_REGISTRY }}
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5 
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
