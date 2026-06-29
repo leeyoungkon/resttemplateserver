@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: resttemplateclient-vs
+  name: openfeignclient-vs
 spec:
   hosts:
     - "*"
@@ -18,6 +18,6 @@ spec:
         retryOn: gateway-error,connect-failure,refused-stream
       route:
         - destination:
-            host: resttemplateserver.default.svc.cluster.local
+            host: openfeignclient.default.svc.cluster.local
             port:
-              number: 8083
+              number: 8080
