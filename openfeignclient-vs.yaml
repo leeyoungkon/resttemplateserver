@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: openfeignclient-vs
+  namespace: default
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - resttemplate-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /books
+      route:
+        - destination:
+            host: openfeignclient.default.svc.cluster.local
+            port:
+              number: 8083
